@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<title>NLP Ngram Analyzer</title>
+	<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+body{
+	background-color:#fbfffe;
+}
+</style>
+</head>
+<body>
+
+
+<div style="margin:20px">
+<div class="row">
+<div class="col">
+<b>Cümle;</b>
+<div class="input-group mb-3">
+  <input type="text" class="form-control" placeholder="Cümle" aria-label="" aria-describedby="button-addon2" id="tCumle">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="analiz()">Analiz et</button>
+  </div>
+</div>
+</div>
+</div>
+
+
+
+<div class="row">
+<div class="col">
+<b>Frekans;</b>
+<div id="tablo">Cümle yazarak analiz edin.</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col" style="margin-top:20px;">
+<b>Ngram;</b>
+<div id="ngram">Cümle yazarak analiz edin.</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col" style="margin-top:20px;">
+<b>Bigram;</b>
+<div id="bigram">Cümle yazarak analiz edin.</div>
+</div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script>
+function analiz(){
+	var htmlMetni="<table>";
+	var htmlMetni2="<table>";
+	var sozluk = new Map();
+	var ngram = new Map();
+	var cumle = document.getElementById("tCumle").value.toLowerCase();
+	cumle = cumle.split('.').join("");
+	var kelimeler = cumle.split(" ");
+	var farklilar = new Array();
+	var adim;
+	htmlMetni +="<tr><td>&nbsp;</td>";
+	htmlMetni2 +="<tr><td>&nbsp;</td>";
+
+	for (adim = 0; adim < kelimeler.length; adim++) {
+		
+		if(farklilar.indexOf(kelimeler[adim])<0){
+			farklilar.push(kelimeler[adim]);
+			htmlMetni +="<td>"+kelimeler[adim]+"</td>";
+			htmlMetni2 +="<td>"+kelimeler[adim]+"</td>";
+		}
+		if(ngram.has(kelimeler[adim])){
+			var y = ngram.get(kelimeler[adim]);
+			ngram.set(kelimeler[adim], y+1);
+		}else{
+			ngram.set(kelimeler[adim], 1);
+		}
+		var t1 = kelimeler[adim]+'#'+kelimeler[adim];
+		var t2 = kelimeler[adim]+'#'+kelimeler[adim+1];
+		var t3 = kelimeler[adim+1]+'#'+kelimeler[adim];
+		var t4 = kelimeler[adim+1]+'#'+kelimeler[adim+1];
+		if(!sozluk.has(t1)){
+			sozluk.set(t1, 0);
+		}
+		if(adim+1!=kelimeler.length){
+		if(!sozluk.has(t2)){
+			sozluk.set(t2, 1);
+		}else{
+			var v = sozluk.get(t2);
+			sozluk.set(t2, v+1);
+		}
+		if(!sozluk.has(t3)){
+			sozluk.set(t3, 0);
+		}
+		if(!sozluk.has(t4)){
+			sozluk.set(t4, 0);
+		}}
+	}
+	htmlMetni +="</tr>";
+	htmlMetni2 +="</tr>";
+	//////////////////////////////////////////////////////////////////
+	var ngramMetni="<table>";
+	var _buffer1="<tr>";
+	var _buffer2="<tr>";
+	for (var [key, value] of ngram) {
+		_buffer1+="<td>"+key+"</td>";
+		_buffer2+="<td>"+value+"</td>";
+	}
+	_buffer1+="</tr>";
+	_buffer2+="</tr>";
+	ngramMetni+=_buffer1+_buffer2+"</table>";
+	document.getElementById("ngram").innerHTML=ngramMetni;
+	//////////////////////////////////////////////////////////////////
+	for(var a = 0;a<farklilar.length;a++){
+		htmlMetni +="<tr><td>"+farklilar[a]+"</td>";
+		htmlMetni2 +="<tr><td>"+farklilar[a]+"</td>";
+		for(var b = 0;b<farklilar.length;b++){
+			if(sozluk.get(farklilar[a]+'#'+farklilar[b])==null){
+				htmlMetni +="<td>0</td>";
+				htmlMetni2 +="<td>0.00</td>";
+			}else{
+			htmlMetni +="<td>"+sozluk.get(farklilar[a]+'#'+farklilar[b])+"</td>";
+			var sutunFrekans = sozluk.get(farklilar[a]+'#'+farklilar[b]);
+			var sutunNgram = ngram.get(farklilar[a]);
+			var sonuc = parseInt(sutunFrekans)/parseInt(sutunNgram);
+			sonuc = sonuc.toFixed(2);
+			htmlMetni2 +="<td>"+sonuc+"</td>";
+			}
+		}
+		htmlMetni +="</tr>";
+		htmlMetni2 +="</tr>";
+	}
+	htmlMetni +="</table>";
+	htmlMetni2 +="</table>";
+	document.getElementById("tablo").innerHTML=htmlMetni;
+	document.getElementById("bigram").innerHTML=htmlMetni2;
+	//////////////////////////////////////////////////////////////////
+
+}
+</script>
+</body>
+</html>
